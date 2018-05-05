@@ -21,30 +21,41 @@ function mainPrompt() {
     inquirer.prompt([
         {
             message: 'What do you want to do?.',
-            type: 'rawlist',
-            choices: ['View Product Sales by Departmemt', 'Create New Department'],
+            type: 'list',
+            choices: [
+                {name: 'View Product Sales by Departmemt', value: viewProductSales},
+                {name: 'Create New Department', value: createDepartment}
+            ],
             name: 'choice'
         }
     ]).then(function (answer) {  
-        if(answer.choice == 'View Product Sales by Departmemt') viewProductSales(0)
-        else createDepartment()
+        answer.choice()
+        // if(answer.choice == 'View Product Sales by Departmemt') viewProductSales(0)
+        // else createDepartment()
     })
 }
 
 function viewProductSales() {
     var query = connection.query(
-        'SELECT * FROM products INNER JOIN departments ON products.department_name = departments.department_name ORDER BY products.department_name',
+
+        'SELECT departments.department_id, departments.department_name, SUM(over_head_costs) AS overhead, SUM(product_sales) AS sales FROM products RIGHT JOIN departments ON departments.department_name = products.department_name GROUP BY products.department_name',
         function (err, res) { 
-            var head = [];
+            var head = [],
+                totalOverhead = [],
+                totalSales = []
 
             var table = new Table({
-                head: ['ID', 'Department', 'Product', 'Overhead Costs', 'Product Sales', 'Total Profit']
-              , colWidths: [5, 15, 25, 20, 15, 15]
+                head: ['ID', 'Department', 'Overhead Costs', 'Product Sales', 'Total Profit']
+              , colWidths: [5, 15, 25, 20, 15]
             });
 
             for(var i = 0; i < res.length; i++) {
-                console.log(res[i])
-                table.push([res[i].department_id, res[i].department_name, res[i].product_name, '$'+parseFloat(res[i].over_head_costs).toFixed(2), '$'+parseFloat(res[i].product_sales).toFixed(2), '$'+parseFloat(parseFloat(res[i].product_sales).toFixed(2) - res[i].over_head_costs).toFixed(2)])
+                var sales;
+                if(res[i].sales == null) {
+                    res[i].sales = 0;
+                    // console.log(res[i].sales)
+                }
+                table.push([res[i].department_id, res[i].department_name, res[i].overhead, res[i].sales, res[i].sales - res[i].overhead])
             }
 
             console.log(table.toString()) 

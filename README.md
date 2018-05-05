@@ -1,1 +1,3 @@
 # bamazon
+
+make demo gifs
