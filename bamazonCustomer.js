@@ -25,12 +25,12 @@ function showItems() {
             var head = [];
 
             var table = new Table({
-                head: ['ID', 'Product', 'Department', 'Price', 'Quantity']
-              , colWidths: [5, 25, 15, 10, 10]
+                head: ['ID', 'Product', 'Department', 'Price', 'Quantity', 'Product Sales']
+              , colWidths: [5, 25, 15, 10, 10, 10]
             });
 
             for(var i = 0; i < res.length; i++) {
-                table.push([res[i].item_id, res[i].product_name, res[i].department_name, parseFloat(res[i].price).toFixed(2), res[i].stock_quantity])
+                table.push([res[i].item_id, res[i].product_name, res[i].department_name, parseFloat(res[i].price).toFixed(2), res[i].stock_quantity, parseFloat(res[i].product_sales).toFixed(2)])
             }
 
             console.log(table.toString())            
@@ -57,21 +57,26 @@ function checkQuantity(item, quantity) {
     var query = connection.query(
         'SELECT * FROM products WHERE item_id=?', [item],
         (err, res) => {  
-            if(res[0].stock_quantity < quantity) console.log('Insufficient Quantity.\n')
+            if(res[0].stock_quantity < quantity) {
+                console.log('Insufficient Quantity.\n')
+                showItems();
+            }                
             else {
                 var query = connection.query(
-                    'UPDATE products SET ? WHERE ? ', 
+                    'UPDATE products SET ? WHERE ?', 
                     [
                         {
                             stock_quantity: res[0].stock_quantity - quantity,
-                            product_sales: res[0].product_sales += parseFloat(res[0].price * quantity).toFixed(2)
-                        },
+                            product_sales: (parseFloat(res[0].product_sales) + parseFloat(res[0].price) * parseFloat(quantity)).toFixed(2)
+                        }
+                        ,
                         {
-                            item_id: item   
+                            item_id: item  
                         }
                     ],
                     (err, result) => {  
                         console.log('Total cost of purchase: $' + parseFloat(res[0].price * quantity).toFixed(2))
+                        showItems();                        
                     }
                 )
             }

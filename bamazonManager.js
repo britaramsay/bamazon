@@ -97,24 +97,21 @@ function increaseQuantity(item, quantity) {
     var query = connection.query(
         'SELECT * FROM products WHERE item_id=?', [item],
         (err, res) => {  
-            if(res[0].stock_quantity < quantity) console.log('Insufficient Quantity.\n')
-            else {
-                var query = connection.query(
-                    'UPDATE products SET ? WHERE ? ', 
-                    [
-                        {
-                            stock_quantity: res[0].stock_quantity + parseInt(quantity)
-                        },
-                        {
-                            item_id: item   
-                        }
-                    ],
-                    (err, result) => {  
-                        console.log('Value of items added: $' + parseFloat(res[0].price * quantity).toFixed(2))
-                        mainPrompt()
+            var query = connection.query(
+                'UPDATE products SET ? WHERE ? ', 
+                [
+                    {
+                        stock_quantity: res[0].stock_quantity + parseInt(quantity)
+                    },
+                    {
+                        item_id: item   
                     }
-                )
-            }
+                ],
+                (err, result) => {  
+                    console.log('Value of items added: $' + parseFloat(res[0].price * quantity).toFixed(2))
+                    mainPrompt()
+                }
+            )
         }
     )
 }
@@ -151,7 +148,8 @@ function addNewProduct() {
                 stock_quantity: answers.quantity
             },
             (err, res) => {
-                console.log(res.rowsAffected + ' items added.\n')
+                if(!err)
+                    console.log('Items Added.\n')
                 mainPrompt()
             }
         )

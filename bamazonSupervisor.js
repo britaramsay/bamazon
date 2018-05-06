@@ -50,12 +50,11 @@ function viewProductSales() {
             });
 
             for(var i = 0; i < res.length; i++) {
-                var sales;
+                // If no products have been added to this department, set sales to 0
                 if(res[i].sales == null) {
                     res[i].sales = 0;
-                    // console.log(res[i].sales)
                 }
-                table.push([res[i].department_id, res[i].department_name, res[i].overhead, res[i].sales, res[i].sales - res[i].overhead])
+                table.push([res[i].department_id, res[i].department_name, '$'+parseInt(res[i].overhead).toFixed(2), '$'+parseInt(res[i].sales).toFixed(2), '$'+(parseInt(res[i].sales) - parseInt(res[i].overhead)).toFixed(2)])
             }
 
             console.log(table.toString()) 
